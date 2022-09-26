@@ -1,0 +1,59 @@
+version: '3'
+services:
+  traefik:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 50m
+    networks:
+      - webgateway
+    image: 'traefik:v1.7'
+    restart: always
+    environment:
+      TZ: America/Sao_Paulo
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.toml:/traefik.toml
+      - ./certs:/certs/:rw
+      - ./data/:/data/:rw
+    labels:
+      - "traefik.frontend.rule=Host:traefik.zodlos.com.br"
+      - "traefik.port=8080"
+      - "traefik.enable=true"
+      - "traefik.docker.network=webgateway"
+networks:
+    webgateway:
+     driver: bridge
+    teamspeak:
+    image: teamspeak
+    restart: always
+    ports:
+      - 9987:9987/udp
+      - 10011:10011
+      - 30033:30033
+    environment:
+      TS3SERVER_DB_PLUGIN: ts3db_postgresql
+      TS3SERVER_DB_SQLCREATEPATH: create_postgresql
+      TS3SERVER_DB_HOST: postgressql
+      TS3SERVER_DB_USER: root
+      TS3SERVER_DB_PASSWORD: 221750
+      TS3SERVER_DB_NAME: teamspeak
+      TS3SERVER_DB_WAITUNTILREADY: 30
+      TS3SERVER_LICENSE: accept
+    networks:
+      traefik_webgateway:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 221750
+      POSTGRES_DB: teamspeak
+    ports: 
+      - "5432:5432"
+     
+    
+
+  
